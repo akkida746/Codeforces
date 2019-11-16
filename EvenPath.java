@@ -1,5 +1,7 @@
 package com.example.cp;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -18,33 +20,19 @@ public class EvenPath {
         String[] row = sc.nextLine().split(" ");
         String[] col = sc.nextLine().split(" ");
 
-        int[][] a = new int[arr_size+1][arr_size+1];
-        for(int i=0;i<a.length;i++){
-            for(int j=0;j<a[0].length;j++){
-                if(i==0 && j==0)
-                    continue;
-                if(i==0 && j>0){
-                    a[i][j] = Integer.valueOf(col[j-1]);
-                }
-                else if(i>0 && j==0){
-                    a[i][j] = Integer.valueOf(row[i-1]);
-                }
-                else{
-                    a[i][j] = Integer.valueOf(row[i-1]) + Integer.valueOf(col[j-1]);
-                }
-            }
-        }
-//        printArray(a);
-//        System.out.println();
+        String[] rArr = new String[row.length+1];
+        String[] cArr = new String[row.length+1];
 
-        // Running queries
+        rArr[0] = "-1";
+        cArr[0] = "-1";
+        for(int i=1;i<rArr.length;i++){
+            rArr[i] = row[i-1];
+            cArr[i] = col[i-1];
+        }
+
         for(int i=0;i<test_count;i++){
-            String[] arr1 = sc.nextLine().split(" ");
-            int[] points = new int[arr1.length];
-            for(int k=0;k<arr1.length;k++){
-                points[k] = Integer.valueOf(arr1[k]);
-            }
-            boolean flag = evenPath(a, points);
+            String[] points = sc.nextLine().split(" ");
+            boolean flag = evenPath(rArr, cArr, points);
 
             if(flag == true)
                 System.out.println("YES");
@@ -53,53 +41,46 @@ public class EvenPath {
         }
     }
 
-    static boolean evenPath(int[][] a, int[] points){
-        for(int i=0;i<a.length;i++){
-            int cell1_value = a[points[0]][points[1]];
-            int cell2_value = a[points[2]][points[3]];
-
-            if(cell1_value%2 != 0 || cell2_value%2 != 0)
-                return false;
-
-            boolean[][] visited = new boolean[a.length][a[0].length];
-            return dfsUtil(visited, a, points[0], points[1], points);
+    static boolean evenPath(String[] row, String[] col, String[] points){
+        for(int i=0;i<row.length;i++){
+            Map<String,Boolean> map = new HashMap<>();
+            return dfsUtil(map, row, col, points[0], points[1], points);
         }
         return false;
     }
 
-    static boolean dfsUtil(boolean[][] visited, int[][] a, int r, int c, int[] points){
+    static boolean dfsUtil(Map<String,Boolean> map, String[] row, String[] col, String r, String c, String[] points){
 
-        if(r < 0 || r > a.length-1)
+        int rr = Integer.valueOf(r);
+        int cc = Integer.valueOf(c);
+
+        if(rr < 0 || rr > row.length-1)
             return false;
-        if(c < 0 || c > a[0].length-1)
+        if(cc < 0 || cc > col.length-1)
             return false;
 
-        if(visited[r][c] == true)
+        String key = r + c;
+        if(map.containsKey(key)){
+            if(map.get(key) == true)
+                return true;
             return false;
+        }
+        map.put(key,false);
 
-        //System.out.println("index: " + r + " " + c);
-        visited[r][c] = true;
+        int value = Integer.valueOf(row[rr]) + Integer.valueOf(col[cc]);
 
-        if(a[r][c]%2 != 0)
+        if(value%2 != 0)
             return false;
         // Destination reached
-        if(r == points[2] && c == points[3])
+        if(r.equals(points[2]) && c.equals(points[3])){
+            map.put(key,true);
             return true;
+        }
 
-        // Visit all neighbours
-        return dfsUtil(visited, a, r-1, c, points) ||
-        dfsUtil(visited, a, r+1, c, points) ||
-        dfsUtil(visited, a, r, c-1, points) ||
-        dfsUtil(visited, a, r, c+1, points);
+        return dfsUtil(map, row, col, String.valueOf(rr-1), c, points) ||
+                dfsUtil(map, row, col,String.valueOf(rr+1), c, points) ||
+                dfsUtil(map, row, col,r, String.valueOf(cc-1), points) ||
+                dfsUtil(map, row, col,r, String.valueOf(cc+1), points);
     }
 
-//    static void printArray(int[][] a){
-//        System.out.println();
-//        for(int i=0;i<a.length;i++){
-//            System.out.println();
-//            for(int j=0;j<a[0].length;j++){
-//                System.out.print(a[i][j] + " ");
-//            }
-//        }
-//    }
 }
